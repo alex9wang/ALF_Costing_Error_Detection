@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en-US" target-language="en-US" original="Please update this value">
+    <body>
+      <group id="body">
+        <trans-unit id="Report 558629532 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Costing Error Detection</source>
+          <target>Costing Error Detection</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - Control 2028204616 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Basic Data Test</source>
+          <target>Basic Data Test</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - Control BasicDataTest - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - Control 3187286947 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Item Ledger Entry - Item Application Entry Quantity Check</source>
+          <target>Item Ledger Entry - Item Application Entry Quantity Check</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - Control QtyCheckItemLedgEntry - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - Control 3467542644 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Application Quantity Check</source>
+          <target>Application Quantity Check</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - Control ApplicationQtyCheck - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - Control 3987309499 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Check Valued By Average Cost</source>
+          <target>Check Valued By Average Cost</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - Control ValuedByAverageCheck - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - Control 1862742275 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Check Valuation Date</source>
+          <target>Check Valuation Date</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - Control ValuationDateCheck - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - Control 3802954421 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Check Expected Cost on completely invoiced entry</source>
+          <target>Check Expected Cost on completely invoiced entry</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - Control RemExpectedOnClosedEntry - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - Control 2379091663 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Check Item ledg. Entry No. from Value Entries</source>
+          <target>Check Item ledg. Entry No. from Value Entries</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - Control CheckItemLedgEntryExists - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - ReportLabel 2984138987" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Costing Error Detection</source>
+          <target>Costing Error Detection</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - ReportLabel ReportName</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - ReportLabel 685375560" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Page</source>
+          <target>Page</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - ReportLabel PageNoCaption</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 2476940767" size-unit="char" translate="yes" xml:space="preserve">
+          <source>You must select one or more of the data checks.</source>
+          <target>You must select one or more of the data checks.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text000</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3114637384" size-unit="char" translate="yes" xml:space="preserve">
+          <source>There are no Item Ledger Entries to check.</source>
+          <target>There are no Item Ledger Entries to check.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text001</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3752334001" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Item Ledger Entry - Item Appl. Entry Qty. Check</source>
+          <target>Item Ledger Entry - Item Appl. Entry Qty. Check</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text002</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 95063322" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Application Quantity Check</source>
+          <target>Application Quantity Check</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text003</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 1370456556" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Check Valuation Date</source>
+          <target>Check Valuation Date</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text005</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 2008153173" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Check Valued By Average Cost</source>
+          <target>Check Valued By Average Cost</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text006</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 2645849790" size-unit="char" translate="yes" xml:space="preserve">
+          <source>An %1 exists even though the %2 and %3 are the same in this negative Item Ledger Entry.</source>
+          <target>An %1 exists even though the %2 and %3 are the same in this negative Item Ledger Entry.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text007</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3283546407" size-unit="char" translate="yes" xml:space="preserve">
+          <source>There is more than one %1 with the same combination of %2, %3 and %4.</source>
+          <target>There is more than one %1 with the same combination of %2, %3 and %4.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text008</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3921243024" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The %1 is greater than the %1.</source>
+          <target>The %1 is greater than the %1.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text009</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 1664139952" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The summed %1 of the linked Item Application Entries is not the same as the difference between %2 and %3.</source>
+          <target>The summed %1 of the linked Item Application Entries is not the same as the difference between %2 and %3.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text010</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 1026443335" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The summed %1 of the linked Item Application Entries is not the same as the %2.</source>
+          <target>The summed %1 of the linked Item Application Entries is not the same as the %2.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text011</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 2939533186" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The sign of the %1 in one or more of the linked Item Application Entries must be the opposite (positive must be negative or negative must be positive).</source>
+          <target>The sign of the %1 in one or more of the linked Item Application Entries must be the opposite (positive must be negative or negative must be positive).</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text012</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 2301836569" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The summed %1 of the linked Item Application Entries is different than the %2 of the %3.</source>
+          <target>The summed %1 of the linked Item Application Entries is different than the %2 of the %3.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text013</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 4214926420" size-unit="char" translate="yes" xml:space="preserve">
+          <source>There are no Value Entries for this %1.</source>
+          <target>There are no Value Entries for this %1.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text014</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3577229803" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The summed %1 of the Item Application Entries for this transfer do not add up to zero as they should.</source>
+          <target>The summed %1 of the Item Application Entries for this transfer do not add up to zero as they should.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text015</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 1195352358" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The Value Entries linked to the Item Application Entries do not all have the same %1 or %2.</source>
+          <target>The Value Entries linked to the Item Application Entries do not all have the same %1 or %2.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text016</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 557655741" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The %1 in Value Entries applied to this %2 is earlier than the %1 in the %3 for this %2.</source>
+          <target>The %1 in Value Entries applied to this %2 is earlier than the %1 in the %3 for this %2.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text017</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 857534312" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The value of the %1 field in the corresponding Value Entries is not correct.</source>
+          <target>The value of the %1 field in the corresponding Value Entries is not correct.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text018</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 219837695" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The value of the %1 field in the corresponding Item Application Entries is not correct.</source>
+          <target>The value of the %1 field in the corresponding Item Application Entries is not correct.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text019</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 1940672225" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Function          #1##########################\</source>
+          <target>Function          #1##########################\</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text020</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 2578368842" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Item              #2##########################\</source>
+          <target>Item              #2##########################\</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text021</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 665278991" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Item Ledger Entry #3##########################</source>
+          <target>Item Ledger Entry #3##########################</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text022</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 1302975608" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Basic Data Test</source>
+          <target>Basic Data Test</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text023</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 196491397" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The %1 must not be 0.</source>
+          <target>The %1 must not be 0.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text024</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 834188014" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 must be %2.</source>
+          <target>%1 must be %2.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text025</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3216065459" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 must be %2.</source>
+          <target>%1 must be %2.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text026</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3853762076" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The linked Value Entries do not all have the same value of %1.</source>
+          <target>The linked Value Entries do not all have the same value of %1.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text027</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 2747277865" size-unit="char" translate="yes" xml:space="preserve">
+          <source>A linked %1 should not have the %2 %3 for a positive entry with %4 Consumption.</source>
+          <target>A linked %1 should not have the %2 %3 for a positive entry with %4 Consumption.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text028</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3384974482" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 of Value Entries must not be Yes for any %2 other than Average.</source>
+          <target>%1 of Value Entries must not be Yes for any %2 other than Average.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text029</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 1148659762" size-unit="char" translate="yes" xml:space="preserve">
+          <source>There are no Item Application Entries for this %1.</source>
+          <target>There are no Item Application Entries for this %1.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text030</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 510963145" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Check Expected Cost on a closed entry</source>
+          <target>Check Expected Cost on a closed entry</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text031</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 4168233824" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Expected Cost Amount was not 0 on an invoiced entry</source>
+          <target>Expected Cost Amount was not 0 on an invoiced entry</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text032</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3530537207" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Check Output Completely Invoiced Date</source>
+          <target>Check Output Completely Invoiced Date</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text033</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3699446230" size-unit="char" translate="yes" xml:space="preserve">
+          <source>At least one linked Item Application Entry has an unspecified %1.</source>
+          <target>At least one linked Item Application Entry has an unspecified %1.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text034</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3061749613" size-unit="char" translate="yes" xml:space="preserve">
+          <source>A blank date in %1 was found on an Item Ledger Entry which has been invoiced</source>
+          <target>A blank date in %1 was found on an Item Ledger Entry which has been invoiced</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text035</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 2424052996" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Value Entries with missing Item Ledger Entry</source>
+          <target>Value Entries with missing Item Ledger Entry</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text036</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 1786356379" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Check Exptd. Cost on Completely Invoiced entries</source>
+          <target>Check Exptd. Cost on Completely Invoiced entries</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text037</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 342054122" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Check Completely Invoiced date</source>
+          <target>Check Completely Invoiced date</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text038</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3999324801" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 was different to %2 on a linked Item Application Entry.</source>
+          <target>%1 was different to %2 on a linked Item Application Entry.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text039</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 1404403683" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 was specified on a linked Item Application Entry but the Item Ledger Entry is not Completely Invoiced.</source>
+          <target>%1 was specified on a linked Item Application Entry but the Item Ledger Entry is not Completely Invoiced.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text040</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 2042100300" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 was not equal to %2 on a linked Item Application Entry.</source>
+          <target>%1 was not equal to %2 on a linked Item Application Entry.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text041</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 2679796917" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The summed %1 of the linked Value Entries is not the same as the %2.</source>
+          <target>The summed %1 of the linked Value Entries is not the same as the %2.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text042</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3317493534" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 or %2 was not 0 on a linked Value Entry. However this could be because report 1002 has not been run yet.</source>
+          <target>%1 or %2 was not 0 on a linked Value Entry. However this could be because report 1002 has not been run yet.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text043</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3148584511" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 must be 0 when %2 is true.</source>
+          <target>%1 must be 0 when %2 is true.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text044</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 3786281128" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 or %2 is not 0 on a Completely Invoiced Item Ledger Entry</source>
+          <target>%1 or %2 is not 0 on a Completely Invoiced Item Ledger Entry</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text045</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 129010449" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 must equal %2 when %3 is true.</source>
+          <target>%1 must equal %2 when %3 is true.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text046</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 766707066" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Item Summary</source>
+          <target>Item Summary</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text047</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 2211009323" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 must be 0 on %2 %3 when %4 is true on a %5</source>
+          <target>%1 must be 0 on %2 %3 when %4 is true on a %5</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text048</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 2848705940" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 must be false when %2 &gt; 0 and %3 is %4 on %5 %6</source>
+          <target>%1 must be false when %2 &gt; 0 and %3 is %4 on %5 %6</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text049</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 612391220" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 on a %2 is not equal to %3 on %4 %5</source>
+          <target>%1 on a %2 is not equal to %3 on %4 %5</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text050</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 4269661899" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 on a %2 must not be smaller than or equal to 0.</source>
+          <target>%1 on a %2 must not be smaller than or equal to 0.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text051</note>
+        </trans-unit>
+        <trans-unit id="Report 558629532 - NamedType 1887784454" size-unit="char" translate="yes" xml:space="preserve">
+          <source>%1 must not be blank on a %2.</source>
+          <target>%1 must not be blank on a %2.</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Report Costing Error Detection New - NamedType Text052</note>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+</xliff>

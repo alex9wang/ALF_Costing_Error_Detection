@@ -1,0 +1,5 @@
+cd C:\ProgramData\NavContainerHelper\Extensions\navserver\Program Files\130\RoleTailored Client
+
+finsql.exe Command=ExportToNewSyntax, File="C:\Convert_Objects\Objects_on-prem_NewSyntax_NEW\REP50130.txt", Database="FinancialsUS", ServerName="NAVSERVER\SQLEXPRESS", Filter=Type=report;ID=60010
+
+txt2al.exe --source="C:\Convert_Objects\Objects_on-prem_NewSyntax_NEW" --target="C:\Convert_Objects\Objects_AL" --rename --type=Report --extensionStartId=50130

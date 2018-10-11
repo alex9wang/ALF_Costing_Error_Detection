@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "al",
+            "request": "launch",
+            //"server": "https://businesscentral.dynamics.com/daf804a9-2a50-466a-8c3c-1e87b2af1072",
+            "name": "Publish",
+            "tenant": "M365B348078.onmicrosoft.com",      
+            //"startupObjectId": 22,
+            //"startupObjectType": "Page",
+            //"breakOnError": true
+        }
+    ]
+}

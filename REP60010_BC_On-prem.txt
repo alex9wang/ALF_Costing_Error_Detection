@@ -1,0 +1,2920 @@
+OBJECT Report 60010 Costing Error Detection New
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=NAVDIAG17.10.06;
+  }
+  PROPERTIES
+  {
+    CaptionML=ENU=Costing Error Detection;
+    OnPreReport=VAR
+                  TempItem@1000 : TEMPORARY Record 27;
+                BEGIN
+                  IF NOT (BasicDataTest OR QtyCheckItemLedgEntry OR ApplicationQtyCheck OR
+                          ValuedByAverageCheck OR ValuationDateCheck OR RemExpectedOnClosedEntry OR
+                          OutputCompletelyInvd OR CheckItemLedgEntryExists)
+                  THEN
+                    ERROR(Text000);
+
+                  IF NOT "Item Ledger Entry".FIND('-') THEN
+                    ERROR(Text001);
+
+                  Window.OPEN(Text020 + Text021 + Text022);
+
+                  TempItem.SETRANGE("Costing Method",TempItem."Costing Method"::Average);
+                  IF Item.GETFILTER("Costing Method") <> '' THEN
+                    IF Item.GETFILTER("Costing Method") <> TempItem.GETFILTER("Costing Method") THEN
+                      CostingMethodFiltered := TRUE;
+                END;
+
+    OnPostReport=BEGIN
+                   Window.CLOSE;
+                 END;
+
+    PreviewMode=PrintLayout;
+  }
+  DATASET
+  {
+    { 5414;    ;DataItem;ErrorGroup          ;
+               DataItemTable=Table2000000026;
+               DataItemTableView=SORTING(Number);
+               PrintOnlyIfDetail=Yes;
+               OnPreDataItem=BEGIN
+                               SETRANGE(Number,0,8);
+                             END;
+
+               OnAfterGetRecord=BEGIN
+                                  ErrorGroupIndex := Number;
+                                  CASE ErrorGroupIndex OF
+                                    0:
+                                      IF NOT BasicDataTest THEN
+                                        CurrReport.SKIP
+                                      ELSE
+                                        Window.UPDATE(1,Text023);
+                                    1:
+                                      IF NOT QtyCheckItemLedgEntry THEN
+                                        CurrReport.SKIP
+                                      ELSE
+                                        Window.UPDATE(1,Text002);
+                                    2:
+                                      IF NOT ApplicationQtyCheck THEN
+                                        CurrReport.SKIP
+                                      ELSE
+                                        Window.UPDATE(1,Text003);
+                                    4:
+                                      IF NOT ValuedByAverageCheck THEN
+                                        CurrReport.SKIP
+                                      ELSE
+                                        Window.UPDATE(1,Text006);
+                                    5:
+                                      IF NOT ValuationDateCheck THEN
+                                        CurrReport.SKIP
+                                      ELSE
+                                        Window.UPDATE(1,Text005);
+                                    6:
+                                      IF NOT RemExpectedOnClosedEntry THEN
+                                        CurrReport.SKIP
+                                      ELSE
+                                        Window.UPDATE(1,Text031);
+                                    7:
+                                      IF NOT OutputCompletelyInvd THEN
+                                        CurrReport.SKIP
+                                      ELSE
+                                        Window.UPDATE(1,Text033);
+                                    8:
+                                      IF NOT CheckItemLedgEntryExists THEN
+                                        CurrReport.SKIP
+                                      ELSE
+                                        Window.UPDATE(1,Text036);
+                                  END;
+                                END;
+                                 }
+
+    { 13  ;1   ;Column  ;CompanyName         ;
+               SourceExpr=COMPANYNAME }
+
+    { 15  ;1   ;Column  ;Today               ;
+               SourceExpr=FORMAT(TODAY,0,4) }
+
+    { 1   ;1   ;Column  ;UserID              ;
+               SourceExpr=USERID }
+
+    { 11  ;1   ;Column  ;ShowCaption         ;
+               SourceExpr=ShowCaption }
+
+    { 6918;1   ;Column  ;Number_ErrorGroup   ;
+               SourceExpr=Number }
+
+    { 8129;1   ;DataItem;                    ;
+               DataItemTable=Table27;
+               PrintOnlyIfDetail=Yes;
+               OnPreDataItem=BEGIN
+                               IF ErrorGroupIndex IN [3,4] THEN BEGIN
+                                 IF CostingMethodFiltered THEN
+                                   CurrReport.BREAK
+                                 ELSE
+                                   SETRANGE("Costing Method","Costing Method"::Average);
+                               END ELSE
+                                 SETRANGE("Costing Method");
+                             END;
+
+               OnAfterGetRecord=BEGIN
+                                  IF Type = Type::Service THEN
+                                    CurrReport.SKIP;
+
+                                  Window.UPDATE(2,"No.");
+                                END;
+
+               ReqFilterFields=No. }
+
+    { 3330;2   ;Column  ;No_Item             ;
+               SourceExpr="No." }
+
+    { 1000000006;2;Column;Description_Item   ;
+               DecimalPlaces=0:0;
+               IncludeCaption=Yes;
+               SourceExpr=Description }
+
+    { 9273;2   ;DataItem;ItemCheck           ;
+               DataItemTable=Table27;
+               DataItemTableView=SORTING(No.);
+               OnAfterGetRecord=BEGIN
+                                  ClearErrorText;
+
+                                  CASE ErrorGroupIndex OF
+                                    0:
+                                      CheckItem("No.");
+                                  END;
+
+                                  IF COMPRESSARRAY(ErrorText) = 0 THEN
+                                    CurrReport.SKIP;
+                                END;
+
+               DataItemLink=No.=FIELD(No.) }
+
+    { 2059;3   ;DataItem;ItemErrors          ;
+               DataItemTable=Table2000000026;
+               DataItemTableView=SORTING(Number);
+               OnPreDataItem=BEGIN
+                               SETRANGE(Number,1,COMPRESSARRAY(ErrorText));
+                             END;
+                              }
+
+    { 1170000001;4;Column;ErrorText_ItemErrors;
+               SourceExpr=ErrorText[Number] }
+
+    { 1324;4   ;Column  ;Number_ItemErrors   ;
+               SourceExpr=Number }
+
+    { 7209;2   ;DataItem;                    ;
+               DataItemTable=Table32;
+               DataItemTableView=SORTING(Item No.);
+               OnPreDataItem=BEGIN
+                               CASE ErrorGroupIndex OF
+                                 0:;//Basic Data Test
+                                 1://Qty. Check Item Entry <--> Item Appl. Entry
+                                   BEGIN
+                                     ItemApplEntry.RESET;
+                                     ItemApplEntry.SETCURRENTKEY("Item Ledger Entry No.");
+                                   END;
+                                 2://Application Qty. Check
+                                   BEGIN
+                                     SETRANGE(Positive,TRUE);
+                                     ItemApplEntry.RESET;
+                                     ItemApplEntry.SETCURRENTKEY("Inbound Item Entry No.");
+                                   END;
+                                 3://Check Related Inb. - Outb. Value Entry
+                                   BEGIN
+                                     SETRANGE(Positive,TRUE);
+                                     ItemApplEntry.RESET;
+                                     ItemApplEntry.SETCURRENTKEY("Item Ledger Entry No.");
+                                   END;
+                                 4://Check Valued By Average Cost
+                                   BEGIN
+                                     SETRANGE(Positive,FALSE);
+                                     ItemApplEntry.RESET;
+                                     ItemApplEntry.SETCURRENTKEY("Item Ledger Entry No.");
+                                   END;
+                                 5://Check Valuation Date
+                                   BEGIN
+                                     SETRANGE(Positive,TRUE);
+                                     ItemApplEntry.RESET;
+                                     ItemApplEntry.SETCURRENTKEY("Inbound Item Entry No.");
+                                   END;
+                                 6:// Check remaining expected cost on closed item ledger entry
+                                   BEGIN
+                                     ItemApplEntry.RESET;
+                                     ItemApplEntry.SETCURRENTKEY("Outbound Item Entry No.","Item Ledger Entry No.");
+                                   END;
+                                 7:// Check Output Completely Invd. Date' in Table 339
+                                   BEGIN
+
+                                   END;
+                               END;
+                             END;
+
+               OnAfterGetRecord=BEGIN
+                                  Window.UPDATE(3,"Entry No.");
+                                  ClearErrorText;
+                                  CASE ErrorGroupIndex OF
+                                    0:
+                                      CheckBasicData;
+                                    1:
+                                      CheckItemLedgEntryQty;
+                                    2:
+                                      CheckApplicationQty;
+                                    4:
+                                      CheckValuedByAverageCost;
+                                    5:
+                                      CheckValuationDate;
+                                    6:
+                                      CheckRemainingExpectedAmount;
+                                    7:
+                                      CheckOutputCompletelyInvdDate;
+
+                                  END;
+
+                                  IF COMPRESSARRAY(ErrorText) = 0 THEN
+                                    CurrReport.SKIP;
+                                END;
+
+               DataItemLink=Item No.=FIELD(No.) }
+
+    { 2   ;3   ;Column  ;EntryNo_ItemLedgerEntry;
+               IncludeCaption=Yes;
+               SourceExpr="Entry No." }
+
+    { 1000000009;3;Column;EntryType_ItemLedgerEntry;
+               IncludeCaption=Yes;
+               SourceExpr="Entry Type" }
+
+    { 3   ;3   ;Column  ;EntryTypeFormat_ItemLedgerEntry;
+               SourceExpr=FORMAT("Entry Type") }
+
+    { 1000000003;3;Column;ItemNo_ItemLedgerEntry;
+               IncludeCaption=Yes;
+               SourceExpr="Item No." }
+
+    { 4   ;3   ;Column  ;Quantity_ItemLedgerEntry;
+               IncludeCaption=Yes;
+               SourceExpr=Quantity }
+
+    { 5   ;3   ;Column  ;RemainingQuantity_ItemLedgerEntry;
+               IncludeCaption=Yes;
+               SourceExpr="Remaining Quantity" }
+
+    { 6   ;3   ;Column  ;Positive_ItemLedgerEntry;
+               IncludeCaption=Yes;
+               SourceExpr=Positive }
+
+    { 7   ;3   ;Column  ;Open_ItemLedgerEntry;
+               IncludeCaption=Yes;
+               SourceExpr=Open }
+
+    { 9   ;3   ;Column  ;PostingDate_ItemLedgerEntry;
+               IncludeCaption=Yes;
+               SourceExpr="Posting Date" }
+
+    { 6545;3   ;DataItem;Errors              ;
+               DataItemTable=Table2000000026;
+               DataItemTableView=SORTING(Number);
+               OnPreDataItem=BEGIN
+                               SETRANGE(Number,1,COMPRESSARRAY(ErrorText))
+                             END;
+                              }
+
+    { 8   ;4   ;Column  ;ErrorText_Errors    ;
+               SourceExpr=ErrorText[Number] }
+
+    { 6212;4   ;Column  ;Number_Errors       ;
+               SourceExpr=Number }
+
+    { 8894;2   ;DataItem;                    ;
+               DataItemTable=Table5802;
+               DataItemTableView=SORTING(Item No.,Posting Date,Item Ledger Entry Type,Entry Type,Variance Type,Item Charge No.,Location Code,Variant Code);
+               OnPreDataItem=BEGIN
+                               IF (ErrorGroupIndex <> 8) OR (Item."No." = '') THEN
+                                 CurrReport.BREAK;
+
+                               IF NOT CheckItemLedgEntryExists THEN
+                                 CurrReport.BREAK;
+                             END;
+
+               OnAfterGetRecord=VAR
+                                  ItemLedgEntry@1000000000 : Record 32;
+                                BEGIN
+                                  IF ItemLedgEntry.GET("Item Ledger Entry No.") THEN
+                                    CurrReport.SKIP;
+
+                                  IF Item2.GET("Item No.") THEN BEGIN
+                                    ItemTemp := Item2;
+                                    IF ItemTemp.INSERT THEN;
+                                  END;
+                                END;
+
+               DataItemLink=Item No.=FIELD(No.) }
+
+    { 1000000014;3;Column;EntryNo_ValueEntry ;
+               SourceExpr="Entry No." }
+
+    { 1000000004;3;Column;ItemNo_ValueEntry  ;
+               SourceExpr="Item No." }
+
+    { 1000000005;3;Column;ItemLedgerEntryType_ValueEntry;
+               SourceExpr="Item Ledger Entry Type" }
+
+    { 1000000018;3;Column;PostingDate_ValueEntry;
+               SourceExpr="Posting Date" }
+
+    { 1000000022;3;Column;ItemLedgerEntryQuantity_ValueEntry;
+               SourceExpr="Item Ledger Entry Quantity" }
+
+    { 5444;    ;DataItem;Summary             ;
+               DataItemTable=Table2000000026;
+               DataItemTableView=SORTING(Number);
+               OnPreDataItem=BEGIN
+                               SETRANGE(Number,1,ItemTemp.COUNT);
+                             END;
+
+               OnAfterGetRecord=BEGIN
+                                  IF Number = 1 THEN
+                                    ItemTemp.FINDFIRST
+                                  ELSE
+                                    ItemTemp.NEXT;
+                                END;
+                                 }
+
+    { 1000000001;1;Column;ItemSummaryCaption ;
+               SourceExpr=Text047 }
+
+    { 1000000002;1;Column;No_Summary         ;
+               SourceExpr=ItemTemp."No." }
+
+    { 1000000000;1;Column;Description_Summary;
+               SourceExpr=ItemTemp.Description }
+
+    { 7272;1   ;Column  ;Number_Summary      ;
+               SourceExpr=Number }
+
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+      SaveValues=Yes;
+    }
+    CONTROLS
+    {
+      { 1000000000;;Container;
+                  Name=Root;
+                  ContainerType=ContentArea }
+
+      { 1000000001;1;Field  ;
+                  CaptionML=ENU=Basic Data Test;
+                  SourceExpr=BasicDataTest }
+
+      { 1000000002;1;Field  ;
+                  CaptionML=ENU=Item Ledger Entry - Item Application Entry Quantity Check;
+                  SourceExpr=QtyCheckItemLedgEntry }
+
+      { 1000000003;1;Field  ;
+                  CaptionML=ENU=Application Quantity Check;
+                  SourceExpr=ApplicationQtyCheck }
+
+      { 1000000004;1;Field  ;
+                  CaptionML=ENU=Check Valued By Average Cost;
+                  SourceExpr=ValuedByAverageCheck }
+
+      { 1000000005;1;Field  ;
+                  CaptionML=ENU=Check Valuation Date;
+                  SourceExpr=ValuationDateCheck }
+
+      { 1000000006;1;Field  ;
+                  CaptionML=ENU=Check Expected Cost on completely invoiced entry;
+                  SourceExpr=RemExpectedOnClosedEntry }
+
+      { 1000000007;1;Field  ;
+                  CaptionML=ENU=Check Item ledg. Entry No. from Value Entries;
+                  SourceExpr=CheckItemLedgEntryExists }
+
+    }
+  }
+  LABELS
+  {
+    { 1000000007;ReportName    ;CaptionML=ENU=Costing Error Detection }
+    { 1000000008;PageNoCaption ;CaptionML=ENU=Page }
+  }
+  CODE
+  {
+    VAR
+      ItemApplEntry@1007 : Record 339;
+      Item2@1000000021 : Record 27;
+      ItemTemp@1000000003 : TEMPORARY Record 27;
+      ErrorGroupIndex@1015 : Integer;
+      ErrorIndex@1016 : Integer;
+      BasicDataTest@1006 : Boolean;
+      QtyCheckItemLedgEntry@1000 : Boolean;
+      ApplicationQtyCheck@1001 : Boolean;
+      ValuedByAverageCheck@1004 : Boolean;
+      ValuationDateCheck@1003 : Boolean;
+      Text000@1005 : TextConst 'ENU=You must select one or more of the data checks.';
+      Text001@1011 : TextConst 'ENU=There are no Item Ledger Entries to check.';
+      Text002@1009 : TextConst 'ENU=Item Ledger Entry - Item Appl. Entry Qty. Check';
+      Text003@1010 : TextConst 'ENU=Application Quantity Check';
+      Text005@1019 : TextConst 'ENU=Check Valuation Date';
+      Text006@1020 : TextConst 'ENU=Check Valued By Average Cost';
+      CostingMethodFiltered@1041 : Boolean;
+      ErrorText@1014 : ARRAY [20] OF Text[250];
+      Text007@1017 : TextConst 'ENU=An %1 exists even though the %2 and %3 are the same in this negative Item Ledger Entry.';
+      Text008@1021 : TextConst 'ENU=There is more than one %1 with the same combination of %2, %3 and %4.';
+      Text009@1023 : TextConst 'ENU=The %1 is greater than the %1.';
+      Text010@1024 : TextConst 'ENU=The summed %1 of the linked Item Application Entries is not the same as the difference between %2 and %3.';
+      Text011@1025 : TextConst 'ENU=The summed %1 of the linked Item Application Entries is not the same as the %2.';
+      Text012@1026 : TextConst 'ENU=The sign of the %1 in one or more of the linked Item Application Entries must be the opposite (positive must be negative or negative must be positive).';
+      Text013@1028 : TextConst 'ENU=The summed %1 of the linked Item Application Entries is different than the %2 of the %3.';
+      Text014@1027 : TextConst 'ENU=There are no Value Entries for this %1.';
+      Text015@1030 : TextConst 'ENU=The summed %1 of the Item Application Entries for this transfer do not add up to zero as they should.';
+      Text016@1031 : TextConst 'ENU=The Value Entries linked to the Item Application Entries do not all have the same %1 or %2.';
+      Text017@1032 : TextConst 'ENU=The %1 in Value Entries applied to this %2 is earlier than the %1 in the %3 for this %2.';
+      Text018@1033 : TextConst 'ENU=The value of the %1 field in the corresponding Value Entries is not correct.';
+      Text019@1034 : TextConst 'ENU=The value of the %1 field in the corresponding Item Application Entries is not correct.';
+      Window@1035 : Dialog;
+      Text020@1036 : TextConst 'ENU=Function          #1##########################\';
+      Text021@1037 : TextConst 'ENU=Item              #2##########################\';
+      Text022@1038 : TextConst 'ENU=Item Ledger Entry #3##########################';
+      Text023@1008 : TextConst 'ENU=Basic Data Test';
+      Text024@1012 : TextConst 'ENU=The %1 must not be 0.';
+      Text025@1013 : TextConst 'ENU=%1 must be %2.';
+      Text026@1022 : TextConst 'ENU=%1 must be %2.';
+      Text027@1029 : TextConst 'ENU=The linked Value Entries do not all have the same value of %1.';
+      Text028@1039 : TextConst 'ENU=A linked %1 should not have the %2 %3 for a positive entry with %4 Consumption.';
+      Text029@1040 : TextConst 'ENU=%1 of Value Entries must not be Yes for any %2 other than Average.';
+      Text030@1045 : TextConst 'ENU=There are no Item Application Entries for this %1.';
+      RemExpectedOnClosedEntry@1000000001 : Boolean;
+      Text031@1000000002 : TextConst 'ENU=Check Expected Cost on a closed entry';
+      Text032@1000000004 : TextConst 'ENU=Expected Cost Amount was not 0 on an invoiced entry';
+      OutputCompletelyInvd@1000000005 : Boolean;
+      Text033@1000000006 : TextConst 'ENU=Check Output Completely Invoiced Date';
+      Text034@1000000007 : TextConst 'ENU=At least one linked Item Application Entry has an unspecified %1.';
+      Text035@1000000008 : TextConst 'ENU=A blank date in %1 was found on an Item Ledger Entry which has been invoiced';
+      CheckItemLedgEntryExists@1000000009 : Boolean;
+      Text036@1000000010 : TextConst 'ENU=Value Entries with missing Item Ledger Entry';
+      Text037@1000000011 : TextConst 'ENU=Check Exptd. Cost on Completely Invoiced entries';
+      Text038@1000000012 : TextConst 'ENU=Check Completely Invoiced date';
+      Text039@1000000013 : TextConst 'ENU=%1 was different to %2 on a linked Item Application Entry.';
+      Text040@1000000014 : TextConst 'ENU=%1 was specified on a linked Item Application Entry but the Item Ledger Entry is not Completely Invoiced.';
+      Text041@1000000015 : TextConst 'ENU=%1 was not equal to %2 on a linked Item Application Entry.';
+      Text042@1000000016 : TextConst 'ENU=The summed %1 of the linked Value Entries is not the same as the %2.';
+      Text043@1000000017 : TextConst 'ENU=%1 or %2 was not 0 on a linked Value Entry. However this could be because report 1002 has not been run yet.';
+      Text044@1000000018 : TextConst 'ENU=%1 must be 0 when %2 is true.';
+      Text045@1000000019 : TextConst 'ENU=%1 or %2 is not 0 on a Completely Invoiced Item Ledger Entry';
+      Text046@1000000000 : TextConst 'ENU=%1 must equal %2 when %3 is true.';
+      Text047@1000000020 : TextConst 'ENU=Item Summary';
+      Text048@1000000022 : TextConst 'ENU=%1 must be 0 on %2 %3 when %4 is true on a %5';
+      Text049@1000000023 : TextConst 'ENU=%1 must be false when %2 > 0 and %3 is %4 on %5 %6';
+      Text050@1000000024 : TextConst 'ENU=%1 on a %2 is not equal to %3 on %4 %5';
+      Text051@1170000000 : TextConst 'ENU=%1 on a %2 must not be smaller than or equal to 0.';
+      Text052@1170000001 : TextConst 'ENU=%1 must not be blank on a %2.';
+
+    PROCEDURE ShowCaption@79() : Text[50];
+    BEGIN
+      //ShowCaption
+      CASE ErrorGroupIndex OF
+        0:
+          EXIT(Text023);
+        1:
+          EXIT(Text002);
+        2:
+          EXIT(Text003);
+        4:
+          EXIT(Text006);
+        5:
+          EXIT(Text005);
+        6:
+          EXIT(Text037);
+        7:
+          EXIT(Text038);
+        8:
+          EXIT(Text036);
+      END;
+    END;
+
+    PROCEDURE ClearErrorText@3();
+    BEGIN
+      //ClearErrorText
+      IF COMPRESSARRAY(ErrorText) <> 0 THEN
+        FOR ErrorIndex := 1 TO COMPRESSARRAY(ErrorText) DO
+          ErrorText[ErrorIndex] := '';
+      ErrorIndex := 1;
+    END;
+
+    PROCEDURE CheckBasicData@8();
+    BEGIN
+      //CheckBasicData
+      BasicCheckItemLedgEntry;
+      BasicCheckValueEntry;
+    END;
+
+    PROCEDURE BasicCheckItemLedgEntry@1();
+    VAR
+      ValueEntry@1000000000 : Record 5802;
+    BEGIN
+      //BasicCheckItemLedgEntry
+      WITH "Item Ledger Entry" DO BEGIN
+        IF "Entry No." <= 0 THEN
+          AddError(STRSUBSTNO(Text051,FIELDCAPTION("Entry No."),TABLECAPTION),"Item No.");
+        IF Quantity = 0 THEN BEGIN
+          AddError(STRSUBSTNO(Text024,FIELDCAPTION(Quantity)),"Item No.");
+        END ELSE BEGIN
+          IF (Quantity * "Remaining Quantity") < 0 THEN BEGIN
+            AddError(STRSUBSTNO(Text009,FIELDCAPTION("Remaining Quantity"),FIELDCAPTION(Quantity)),"Item No.");
+          END ELSE
+            IF ABS("Remaining Quantity") > ABS(Quantity) THEN BEGIN
+              AddError(STRSUBSTNO(Text009,FIELDCAPTION("Remaining Quantity"),FIELDCAPTION(Quantity)),"Item No.");
+            END;
+          IF (Quantity > 0) <> Positive THEN BEGIN
+            AddError(STRSUBSTNO(Text025,FIELDCAPTION(Positive),NOT Positive),"Item No.");
+          END;
+        END;
+        IF ("Remaining Quantity" = 0) = Open THEN BEGIN
+          AddError(STRSUBSTNO(Text026,FIELDCAPTION(Open),NOT Open),"Item No.");;
+        END;
+
+        IF "Completely Invoiced" THEN BEGIN
+          IF "Invoiced Quantity" <> Quantity THEN BEGIN
+            AddError(
+              STRSUBSTNO(Text046,FIELDCAPTION("Invoiced Quantity"),FIELDCAPTION(Quantity),FIELDCAPTION("Completely Invoiced")),
+              "Item No.");
+          END;
+
+          ValueEntry.SETCURRENTKEY("Item Ledger Entry No.");
+          ValueEntry.SETRANGE("Item Ledger Entry No.","Entry No.");
+          ValueEntry.CALCSUMS("Invoiced Quantity");
+          IF "Invoiced Quantity" <> ValueEntry."Invoiced Quantity" THEN BEGIN
+            AddError(
+              STRSUBSTNO(Text042,ValueEntry.FIELDCAPTION("Invoiced Quantity"),FIELDCAPTION("Invoiced Quantity")),
+              "Item No.");
+          END;
+        END;
+      END;
+    END;
+
+    PROCEDURE BasicCheckValueEntry@6();
+    VAR
+      ValueEntry@1000 : Record 5802;
+      ValuationDate@1004 : Date;
+      ConsumptionDate@1005 : Date;
+      ValuedByAverageCost@1002 : Boolean;
+      Continue@1003 : Boolean;
+      Compare@1001 : Boolean;
+    BEGIN
+      //BasicCheckValueEntry
+      WITH "Item Ledger Entry" DO BEGIN
+        ValueEntry.SETCURRENTKEY("Item Ledger Entry No.");
+        ValueEntry.SETRANGE("Item Ledger Entry No.","Entry No.");
+        ValueEntry.SETRANGE(Inventoriable,TRUE);
+        IF NOT ValueEntry.FIND('-') THEN BEGIN
+          AddError(STRSUBSTNO(Text014,TABLECAPTION),"Item No.");
+        END ELSE BEGIN
+          ValuedByAverageCost := ValueEntry."Valued By Average Cost";
+          REPEAT
+            IF ValueEntry.Adjustment THEN BEGIN
+              IF ValueEntry."Invoiced Quantity" <> 0 THEN BEGIN
+                AddError(STRSUBSTNO(Text044,ValueEntry.FIELDCAPTION("Invoiced Quantity"),ValueEntry.FIELDCAPTION(Adjustment)),
+                "Item No.");
+                Continue := TRUE;
+              END;
+              IF ValueEntry."Item Ledger Entry Quantity" <> 0 THEN BEGIN
+                AddError(
+                  STRSUBSTNO(Text048,"Item Ledger Entry".FIELDCAPTION(Quantity),
+                    "Item Ledger Entry".TABLECAPTION,"Item Ledger Entry"."Entry No.",
+                    ValueEntry.FIELDCAPTION(Adjustment),ValueEntry.TABLECAPTION),
+                    "Item Ledger Entry"."Item No.");
+              END;
+            END;
+            IF ("Entry Type" = "Entry Type"::Consumption) AND Positive AND
+               (ValueEntry."Valuation Date" = DMY2DATE(31,12,9999))
+            THEN BEGIN
+              ConsumptionDate := DMY2DATE(31,12,9999);
+              AddError(
+                STRSUBSTNO(Text028,ValueEntry.TABLECAPTION,ValueEntry.FIELDCAPTION("Valuation Date"),ConsumptionDate,
+                FIELDCAPTION("Entry Type")),
+                "Item No.");
+              Continue := TRUE;
+            END ELSE BEGIN
+              IF (NOT Compare) AND (ValueEntry."Valuation Date" <> 0D) AND
+                 NOT (ValueEntry."Entry Type" IN [ValueEntry."Entry Type"::Rounding,ValueEntry."Entry Type"::Revaluation])
+              THEN BEGIN
+                ValuationDate := ValueEntry."Valuation Date";
+                Compare := TRUE;
+              END;
+              IF Compare THEN
+                IF (ValueEntry."Valuation Date" <> ValuationDate) AND (ValueEntry."Valuation Date" <> 0D) AND
+                   NOT (ValueEntry."Entry Type" IN [ValueEntry."Entry Type"::Rounding,ValueEntry."Entry Type"::Revaluation])
+                THEN BEGIN
+                  AddError(STRSUBSTNO(Text027,ValueEntry.FIELDCAPTION("Valuation Date")),"Item No.");
+                  Continue := TRUE;
+                END;
+            END;
+            IF (ValueEntry."Valued By Average Cost") AND
+               (Item."Costing Method" <> Item."Costing Method"::Average)
+            THEN BEGIN
+              AddError(STRSUBSTNO(Text029,ValueEntry.FIELDCAPTION("Valued By Average Cost"),Item.FIELDCAPTION("Costing Method")),
+              "Item No.");
+              Continue := TRUE;
+            END ELSE
+              IF ValueEntry."Valued By Average Cost" <> ValuedByAverageCost THEN BEGIN
+                AddError(STRSUBSTNO(Text027,ValueEntry.FIELDCAPTION("Valued By Average Cost")),"Item No.");
+                Continue := TRUE;
+              END;
+
+            IF (ValueEntry."Valued By Average Cost") AND
+               (Item."Costing Method" = Item."Costing Method"::Average) AND
+               (NOT Correction)
+             THEN
+              IF ValueEntry."Valued Quantity" > 0 THEN BEGIN
+                  AddError(STRSUBSTNO(Text049,
+                    ValueEntry.FIELDCAPTION("Valued By Average Cost"),
+                    ValueEntry.FIELDCAPTION("Valued Quantity"),
+                    Item.FIELDCAPTION("Costing Method"),
+                    FORMAT(Item."Costing Method"),
+                    ValueEntry.TABLECAPTION,
+                    ValueEntry."Entry No."),
+                    "Item No.");
+                END;
+
+            IF ValueEntry."Item Charge No." = '' THEN
+              IF ValueEntry."Item Ledger Entry Type" <> "Entry Type" THEN BEGIN
+                AddError(STRSUBSTNO(Text050,
+                  ValueEntry.FIELDCAPTION("Item Ledger Entry Type"),
+                  ValueEntry.TABLECAPTION,
+                  FIELDCAPTION("Entry Type"),
+                  "Item Ledger Entry".TABLECAPTION,
+                  "Item Ledger Entry"."Entry No."),
+                  "Item Ledger Entry"."Item No.");
+              END;
+          UNTIL (ValueEntry.NEXT = 0) OR Continue;
+        END;
+      END;
+    END;
+
+    PROCEDURE CheckItemLedgEntryQty@9();
+    BEGIN
+      //CheckItemLedgEntryQty
+      WITH "Item Ledger Entry" DO BEGIN
+        IF (NOT Positive) AND Open THEN
+          CheckNegOpenILEQty
+        ELSE
+          CheckILEQty;
+        SearchInbOutbCombination;
+      END;
+    END;
+
+    PROCEDURE CheckNegOpenILEQty@5();
+    VAR
+      ApplQty@1000 : Decimal;
+    BEGIN
+      //CheckNegOpenILEQty
+      WITH "Item Ledger Entry" DO BEGIN
+        IF Quantity = "Remaining Quantity" THEN BEGIN
+          ItemApplEntry.SETRANGE("Item Ledger Entry No.","Entry No.");
+          IF ItemApplEntry.FIND('-') THEN BEGIN
+            AddError(STRSUBSTNO(Text007,ItemApplEntry.TABLECAPTION,FIELDCAPTION("Remaining Quantity"),FIELDCAPTION(Quantity)),
+              "Item No.");
+          END;
+        END ELSE BEGIN
+          ItemApplEntry.SETRANGE("Item Ledger Entry No.","Entry No.");
+          IF ItemApplEntry.FIND('-') THEN BEGIN
+            ApplQty := 0;
+            REPEAT
+              ApplQty := ApplQty + ItemApplEntry.Quantity;
+            UNTIL ItemApplEntry.NEXT = 0;
+            IF ApplQty <> (Quantity - "Remaining Quantity") THEN BEGIN
+              AddError(
+                STRSUBSTNO(
+                  Text010,ItemApplEntry.FIELDCAPTION(Quantity),FIELDCAPTION(Quantity),FIELDCAPTION("Remaining Quantity")),
+                "Item No.");
+            END;
+          END;
+        END;
+      END;
+    END;
+
+    PROCEDURE CheckILEQty@7();
+    VAR
+      ApplQty@1000 : Decimal;
+    BEGIN
+      //CheckILEQty
+      WITH "Item Ledger Entry" DO BEGIN
+        ItemApplEntry.SETRANGE("Item Ledger Entry No.","Entry No.");
+        IF ItemApplEntry.FIND('-') THEN BEGIN
+          ApplQty := 0;
+          REPEAT
+            ApplQty := ApplQty + ItemApplEntry.Quantity;
+          UNTIL ItemApplEntry.NEXT = 0;
+          IF ApplQty <> Quantity THEN BEGIN
+            AddError(STRSUBSTNO(Text011,ItemApplEntry.FIELDCAPTION(Quantity),FIELDCAPTION(Quantity)),"Item No.");
+          END;
+        END ELSE BEGIN
+          AddError(STRSUBSTNO(Text030,TABLECAPTION),"Item No.");
+        END;
+      END;
+    END;
+
+    PROCEDURE SearchInbOutbCombination@19();
+    VAR
+      ItemApplEntry2@1000 : Record 339;
+      Continue@1001 : Boolean;
+    BEGIN
+      //SearchInbOutbCombination
+      WITH "Item Ledger Entry" DO BEGIN
+        IF ItemApplEntry.FIND('-') THEN
+          REPEAT
+            ItemApplEntry2.SETCURRENTKEY(
+              "Item Ledger Entry No.","Inbound Item Entry No.","Outbound Item Entry No.");
+            ItemApplEntry2.SETRANGE("Item Ledger Entry No.",ItemApplEntry."Item Ledger Entry No.");
+            ItemApplEntry2.SETRANGE("Inbound Item Entry No.",ItemApplEntry."Inbound Item Entry No.");
+            ItemApplEntry2.SETRANGE("Outbound Item Entry No.",ItemApplEntry."Outbound Item Entry No.");
+            ItemApplEntry2.SETFILTER("Entry No.",'<>%1',ItemApplEntry."Entry No.");
+            IF ItemApplEntry2.FIND('-') THEN BEGIN
+              AddError(
+                STRSUBSTNO(
+                  Text008,ItemApplEntry2.TABLECAPTION,ItemApplEntry2.FIELDCAPTION("Item Ledger Entry No."),
+                  ItemApplEntry2.FIELDCAPTION("Inbound Item Entry No."),ItemApplEntry2.FIELDCAPTION("Outbound Item Entry No.")),
+                "Item No.");
+              Continue := TRUE;
+            END;
+          UNTIL (ItemApplEntry.NEXT = 0) OR Continue;
+      END;
+    END;
+
+    PROCEDURE CheckApplicationQty@10();
+    VAR
+      ApplQty@1001 : Decimal;
+      Continue@1000 : Boolean;
+    BEGIN
+      //CheckApplicationQty
+      WITH "Item Ledger Entry" DO BEGIN
+        ItemApplEntry.SETRANGE("Inbound Item Entry No.","Entry No.");
+        IF ItemApplEntry.FIND('-') THEN BEGIN
+          REPEAT
+            IF ((ItemApplEntry."Item Ledger Entry No." = ItemApplEntry."Inbound Item Entry No.") AND
+                (ItemApplEntry.Quantity < 0)) OR
+               ((ItemApplEntry."Item Ledger Entry No." <> ItemApplEntry."Inbound Item Entry No.") AND
+                (ItemApplEntry.Quantity > 0)) OR
+               ((ItemApplEntry."Item Ledger Entry No." <> ItemApplEntry."Outbound Item Entry No.") AND
+                (ItemApplEntry.Quantity < 0))
+            THEN BEGIN
+              AddError(STRSUBSTNO(Text012,ItemApplEntry.FIELDCAPTION(Quantity)),"Item No.");
+              Continue := TRUE;
+            END;
+          UNTIL Continue OR (ItemApplEntry.NEXT = 0);
+          ItemApplEntry.FIND('-');
+          ApplQty := 0;
+          REPEAT
+            ApplQty := ApplQty + ItemApplEntry.Quantity;
+          UNTIL ItemApplEntry.NEXT = 0;
+          IF ApplQty <> "Remaining Quantity" THEN BEGIN
+            AddError(
+              STRSUBSTNO(Text013,ItemApplEntry.FIELDCAPTION(Quantity),FIELDCAPTION("Remaining Quantity"),TABLECAPTION),
+              "Item No.");
+          END;
+        END;
+      END;
+    END;
+
+    PROCEDURE CheckValuedByAverageCost@12();
+    BEGIN
+      //CheckValuedByAverageCost
+      CheckVEValuedBySetting;
+      CheckItemApplCostApplSetting;
+    END;
+
+    PROCEDURE CheckVEValuedBySetting@17();
+    VAR
+      ValueEntry@1000 : Record 5802;
+      ValueEntry2@1002 : Record 5802;
+      Continue@1001 : Boolean;
+    BEGIN
+      //CheckVEValuedBySetting
+      WITH "Item Ledger Entry" DO BEGIN
+        ValueEntry2.SETCURRENTKEY("Item Ledger Entry No.");
+        ValueEntry2.SETRANGE(Inventoriable,TRUE);
+        ValueEntry.SETCURRENTKEY("Item Ledger Entry No.");
+        ValueEntry.SETRANGE("Item Ledger Entry No.","Entry No.");
+        ValueEntry.SETRANGE(Inventoriable,TRUE);
+        IF ValueEntry.FIND('-') THEN
+          REPEAT
+            IF ValueEntry."Item Ledger Entry Type" <> ValueEntry."Item Ledger Entry Type"::Output THEN
+              IF "Applies-to Entry" <> 0 THEN BEGIN
+                ValueEntry2.SETRANGE("Item Ledger Entry No.","Applies-to Entry");
+                IF ValueEntry2.FIND('-') THEN
+                  IF ValueEntry."Valued By Average Cost" <> ValueEntry2."Valued By Average Cost" THEN BEGIN
+                    AddError(STRSUBSTNO(Text018,ValueEntry.FIELDCAPTION("Valued By Average Cost")),"Item No.");
+                    Continue := TRUE;
+                  END;
+              END ELSE
+                IF (NOT ValueEntry."Valued By Average Cost") AND
+                   (ValueEntry."Valuation Date" <> 0D)
+                   //NAV2013+.begin
+                   // Starting with Dynamics NAV 2013, an outbound Transfer with <blank> Applies-to Entry field
+                   // is an accurate combination according to new design.
+                   AND
+                   ("Entry Type" <> "Entry Type"::Transfer) AND
+                   (Quantity < 0)
+                   //NAV2013+.end
+                THEN BEGIN
+                  AddError(STRSUBSTNO(Text018,ValueEntry.FIELDCAPTION("Valued By Average Cost")),"Item No.");
+                  Continue := TRUE;
+                END;
+          UNTIL (ValueEntry.NEXT = 0) OR Continue;
+      END;
+    END;
+
+    PROCEDURE CheckItemApplCostApplSetting@18();
+    VAR
+      Continue@1000 : Boolean;
+    BEGIN
+      //CheckItemApplCostApplSetting
+      WITH "Item Ledger Entry" DO BEGIN
+        ItemApplEntry.SETRANGE("Item Ledger Entry No.","Entry No.");
+        IF ItemApplEntry.FIND('-') THEN
+          REPEAT
+            IF ItemApplEntry.Quantity > 0 THEN BEGIN
+              IF NOT ItemApplEntry."Cost Application" THEN BEGIN
+                AddError(STRSUBSTNO(Text019,ItemApplEntry.FIELDCAPTION("Cost Application")),"Item No.");
+                Continue := TRUE;
+              END;
+            END ELSE
+              IF "Applies-to Entry" <> 0 THEN BEGIN
+                IF NOT ItemApplEntry."Cost Application" THEN BEGIN
+                  AddError(STRSUBSTNO(Text019,ItemApplEntry.FIELDCAPTION("Cost Application")),"Item No.");
+                  Continue := TRUE;
+                END;
+              END ELSE
+                //NAV2013+.begin
+                // Starting with Dynamics NAV 2013, an outbound Transfer with Cost Application set to TRUE
+                // is an accurate combination according to new design.
+                //IF ItemApplEntry."Cost Application" THEN BEGIN
+                IF (ItemApplEntry."Cost Application") AND ("Entry Type" <> "Entry Type"::Transfer) THEN BEGIN
+                //NAV2013+.end
+                  AddError(STRSUBSTNO(Text019,ItemApplEntry.FIELDCAPTION("Cost Application")),"Item No.");
+                  Continue := TRUE;
+                END;
+          UNTIL (ItemApplEntry.NEXT = 0) OR Continue;
+      END;
+    END;
+
+    PROCEDURE CheckValuationDate@13();
+    VAR
+      ValueEntry@1000 : Record 5802;
+      ValuationDate@1001 : Date;
+      Continue@1002 : Boolean;
+    BEGIN
+      //CheckValuationDate
+      WITH "Item Ledger Entry" DO BEGIN
+        ValueEntry.SETCURRENTKEY("Item Ledger Entry No.");
+        ValueEntry.SETRANGE("Item Ledger Entry No.","Entry No.");
+        ValueEntry.SETRANGE(Inventoriable,TRUE);
+        ValueEntry.SETRANGE("Partial Revaluation",FALSE);
+        IF ValueEntry.FIND('-') THEN BEGIN
+          ValuationDate := ValueEntry."Valuation Date";
+          ItemApplEntry.SETRANGE("Inbound Item Entry No.","Entry No.");
+          IF ItemApplEntry.FIND('-') THEN
+            REPEAT
+              IF ItemApplEntry.Quantity < 0 THEN BEGIN
+                ValueEntry.SETRANGE("Item Ledger Entry No.",ItemApplEntry."Item Ledger Entry No.");
+                IF ValueEntry.FIND('-') THEN
+                  REPEAT
+                    IF ValueEntry."Valuation Date" < ValuationDate THEN BEGIN
+                      AddError(STRSUBSTNO(Text017,ValueEntry.FIELDCAPTION("Valuation Date"),TABLECAPTION,ValueEntry.TABLECAPTION),
+                        "Item No.");
+                      Continue := TRUE;
+                    END;
+                  UNTIL (ValueEntry.NEXT = 0) OR Continue;
+              END;
+            UNTIL (ItemApplEntry.NEXT = 0) OR Continue;
+        END;
+      END;
+    END;
+
+    PROCEDURE CheckRemainingExpectedAmount@1000000005();
+    VAR
+      ValueEntry@1000000000 : Record 5802;
+      TotalExpectedCostToGL@1000000001 : Decimal;
+      TotalExpectedCostToGLACY@1000000002 : Decimal;
+    BEGIN
+      IF NOT "Item Ledger Entry"."Completely Invoiced" THEN
+        EXIT;
+
+      ValueEntry.SETCURRENTKEY("Item Ledger Entry No.");
+      ValueEntry.SETRANGE("Item Ledger Entry No.","Item Ledger Entry"."Entry No.");
+
+      "Item Ledger Entry".CALCFIELDS("Cost Amount (Expected)","Cost Amount (Expected) (ACY)");
+      IF
+        ("Item Ledger Entry"."Cost Amount (Expected)" = 0) AND
+        ("Item Ledger Entry"."Cost Amount (Expected) (ACY)" = 0)
+      THEN BEGIN
+        IF ValueEntry.FINDSET THEN
+          REPEAT
+            TotalExpectedCostToGL := TotalExpectedCostToGL + ValueEntry."Expected Cost Posted to G/L";
+            TotalExpectedCostToGLACY := TotalExpectedCostToGLACY + ValueEntry."Exp. Cost Posted to G/L (ACY)";
+          UNTIL ValueEntry.NEXT = 0;
+        IF (TotalExpectedCostToGL = 0) AND (TotalExpectedCostToGLACY = 0) THEN
+          EXIT;
+      END;
+
+      IF ValueEntry.FINDSET THEN
+        REPEAT
+          IF (ValueEntry."Expected Cost Posted to G/L" <> 0) OR (ValueEntry."Exp. Cost Posted to G/L (ACY)" <> 0) THEN BEGIN
+            AddError(
+              STRSUBSTNO(Text043,
+                ValueEntry.FIELDCAPTION("Expected Cost Posted to G/L"),ValueEntry.FIELDCAPTION("Exp. Cost Posted to G/L (ACY)")),
+              ValueEntry."Item No.");
+
+          END;
+        UNTIL ValueEntry.NEXT = 0;
+
+      IF ErrorIndex > 0 THEN BEGIN
+        AddError(
+          STRSUBSTNO(
+            Text045,
+            "Item Ledger Entry".FIELDCAPTION("Cost Amount (Expected)"),"Item Ledger Entry".FIELDCAPTION("Cost Amount (Expected) (ACY)")),
+          "Item Ledger Entry"."Item No.");
+      END;
+    END;
+
+    PROCEDURE CheckOutputCompletelyInvdDate@1000000002();
+    VAR
+      ItemApplicationEntry@1000000000 : Record 339;
+      ZeroDateFound@1000000001 : Boolean;
+    BEGIN
+      IF "Item Ledger Entry"."Invoiced Quantity" <> 0 THEN
+        IF "Item Ledger Entry"."Last Invoice Date" = 0D THEN BEGIN
+          AddError(STRSUBSTNO(Text035,"Item Ledger Entry".FIELDCAPTION("Last Invoice Date")),
+            "Item Ledger Entry"."Item No.");
+        END;
+
+      ItemApplicationEntry.SETCURRENTKEY("Item Ledger Entry No.","Output Completely Invd. Date");
+      ItemApplicationEntry.SETRANGE("Item Ledger Entry No.","Item Ledger Entry"."Entry No.");
+      IF ItemApplicationEntry.FINDSET THEN
+        REPEAT
+          IF ItemApplicationEntry.Quantity > 0 THEN BEGIN
+            IF ItemApplicationEntry."Output Completely Invd. Date" <> ItemApplicationEntry."Posting Date" THEN BEGIN
+              ZeroDateFound := TRUE;
+              AddError(
+                STRSUBSTNO(Text039,
+                  ItemApplicationEntry.FIELDCAPTION("Posting Date"),ItemApplicationEntry.FIELDCAPTION("Output Completely Invd. Date")),
+                "Item Ledger Entry"."Item No.");
+            END;
+          END ELSE BEGIN
+            IF "Item Ledger Entry".Quantity = "Item Ledger Entry"."Invoiced Quantity" THEN BEGIN
+              IF ItemApplicationEntry."Output Completely Invd. Date" <> "Item Ledger Entry"."Last Invoice Date" THEN BEGIN
+                ZeroDateFound := TRUE;
+                AddError(
+                  STRSUBSTNO(Text041,
+                    ItemApplicationEntry.FIELDCAPTION("Output Completely Invd. Date"),
+                    "Item Ledger Entry".FIELDCAPTION("Last Invoice Date")),
+                  "Item Ledger Entry"."Item No.");
+              END;
+            END ELSE
+              IF ItemApplicationEntry."Output Completely Invd. Date" <> 0D THEN BEGIN
+                ZeroDateFound := TRUE;
+                AddError(
+                  STRSUBSTNO(Text040,ItemApplicationEntry.FIELDCAPTION("Output Completely Invd. Date")),
+                  "Item Ledger Entry"."Item No.");
+
+              END;
+          END;
+        UNTIL ZeroDateFound OR (ItemApplicationEntry.NEXT = 0);
+    END;
+
+    PROCEDURE CheckItem@1170000001(ItemNo@1170000000 : Code[20]);
+    BEGIN
+      IF ItemNo = '' THEN
+        AddError(STRSUBSTNO(Text052,Item.FIELDCAPTION("No."),Item.TABLECAPTION),ItemNo);
+    END;
+
+    PROCEDURE AddError@1000000000(ErrorMessage@1000000000 : Text[250];ItemNo@1000000001 : Code[20]);
+    BEGIN
+      ErrorText[ErrorIndex] := ErrorMessage;
+      ErrorIndex := ErrorIndex + 1;
+
+      IF Item2.GET(ItemNo) THEN BEGIN
+        ItemTemp := Item2;
+        IF ItemTemp.INSERT THEN;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+  RDLDATA
+  {
+    <?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="DataSource">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString />
+      </ConnectionProperties>
+      <rd:SecurityType>None</rd:SecurityType>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="DataSet_Result">
+      <Query>
+        <DataSourceName>DataSource</DataSourceName>
+        <CommandText />
+      </Query>
+      <Fields>
+        <Field Name="CompanyName">
+          <DataField>CompanyName</DataField>
+        </Field>
+        <Field Name="Today">
+          <DataField>Today</DataField>
+        </Field>
+        <Field Name="UserID">
+          <DataField>UserID</DataField>
+        </Field>
+        <Field Name="ShowCaption">
+          <DataField>ShowCaption</DataField>
+        </Field>
+        <Field Name="Number_ErrorGroup">
+          <DataField>Number_ErrorGroup</DataField>
+        </Field>
+        <Field Name="No_Item">
+          <DataField>No_Item</DataField>
+        </Field>
+        <Field Name="Description_Item">
+          <DataField>Description_Item</DataField>
+        </Field>
+        <Field Name="ErrorText_ItemErrors">
+          <DataField>ErrorText_ItemErrors</DataField>
+        </Field>
+        <Field Name="Number_ItemErrors">
+          <DataField>Number_ItemErrors</DataField>
+        </Field>
+        <Field Name="EntryNo_ItemLedgerEntry">
+          <DataField>EntryNo_ItemLedgerEntry</DataField>
+        </Field>
+        <Field Name="EntryType_ItemLedgerEntry">
+          <DataField>EntryType_ItemLedgerEntry</DataField>
+        </Field>
+        <Field Name="EntryTypeFormat_ItemLedgerEntry">
+          <DataField>EntryTypeFormat_ItemLedgerEntry</DataField>
+        </Field>
+        <Field Name="ItemNo_ItemLedgerEntry">
+          <DataField>ItemNo_ItemLedgerEntry</DataField>
+        </Field>
+        <Field Name="Quantity_ItemLedgerEntry">
+          <DataField>Quantity_ItemLedgerEntry</DataField>
+        </Field>
+        <Field Name="Quantity_ItemLedgerEntryFormat">
+          <DataField>Quantity_ItemLedgerEntryFormat</DataField>
+        </Field>
+        <Field Name="RemainingQuantity_ItemLedgerEntry">
+          <DataField>RemainingQuantity_ItemLedgerEntry</DataField>
+        </Field>
+        <Field Name="RemainingQuantity_ItemLedgerEntryFormat">
+          <DataField>RemainingQuantity_ItemLedgerEntryFormat</DataField>
+        </Field>
+        <Field Name="Positive_ItemLedgerEntry">
+          <DataField>Positive_ItemLedgerEntry</DataField>
+        </Field>
+        <Field Name="Open_ItemLedgerEntry">
+          <DataField>Open_ItemLedgerEntry</DataField>
+        </Field>
+        <Field Name="PostingDate_ItemLedgerEntry">
+          <DataField>PostingDate_ItemLedgerEntry</DataField>
+        </Field>
+        <Field Name="ErrorText_Errors">
+          <DataField>ErrorText_Errors</DataField>
+        </Field>
+        <Field Name="Number_Errors">
+          <DataField>Number_Errors</DataField>
+        </Field>
+        <Field Name="EntryNo_ValueEntry">
+          <DataField>EntryNo_ValueEntry</DataField>
+        </Field>
+        <Field Name="ItemNo_ValueEntry">
+          <DataField>ItemNo_ValueEntry</DataField>
+        </Field>
+        <Field Name="ItemLedgerEntryType_ValueEntry">
+          <DataField>ItemLedgerEntryType_ValueEntry</DataField>
+        </Field>
+        <Field Name="PostingDate_ValueEntry">
+          <DataField>PostingDate_ValueEntry</DataField>
+        </Field>
+        <Field Name="ItemLedgerEntryQuantity_ValueEntry">
+          <DataField>ItemLedgerEntryQuantity_ValueEntry</DataField>
+        </Field>
+        <Field Name="ItemLedgerEntryQuantity_ValueEntryFormat">
+          <DataField>ItemLedgerEntryQuantity_ValueEntryFormat</DataField>
+        </Field>
+        <Field Name="ItemSummaryCaption">
+          <DataField>ItemSummaryCaption</DataField>
+        </Field>
+        <Field Name="No_Summary">
+          <DataField>No_Summary</DataField>
+        </Field>
+        <Field Name="Description_Summary">
+          <DataField>Description_Summary</DataField>
+        </Field>
+        <Field Name="Number_Summary">
+          <DataField>Number_Summary</DataField>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <ReportItems>
+          <Tablix Name="Tablix1">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>2.12958cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.5cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.1825cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.12958cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.05021cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.5cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.30813cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.05cm</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.6cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="EntryNo_ItemLedgerEntryCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!EntryNo_ItemLedgerEntryCaption.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>EntryNo_ItemLedgerEntryCaption</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemNo_ItemLedgerEntryCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!ItemNo_ItemLedgerEntryCaption.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ItemNo_ItemLedgerEntryCaption</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="PostingDate_ItemLedgerEntryCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!PostingDate_ItemLedgerEntryCaption.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>PostingDate_ItemLedgerEntryCaption</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="EntryType_ItemLedgerEntryCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!EntryType_ItemLedgerEntryCaption.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>EntryType_ItemLedgerEntryCaption</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Quantity_ItemLedgerEntryCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!Quantity_ItemLedgerEntryCaption.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Quantity_ItemLedgerEntryCaption</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="RemainingQuantity_ItemLedgerEntryCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!RemainingQuantity_ItemLedgerEntryCaption.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>RemainingQuantity_ItemLedgerEntryCaption</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Positive_ItemLedgerEntryCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!Positive_ItemLedgerEntryCaption.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Positive_ItemLedgerEntryCaption</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Open_ItemLedgerEntryCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!Open_ItemLedgerEntryCaption.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Open_ItemLedgerEntryCaption</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>1.26146cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ShowCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ShowCaption.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ShowCaption</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                        <ColSpan>8</ColSpan>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.6cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox28">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!Description_ItemCaption.Value &amp; ":"</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox28</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                        <ColSpan>2</ColSpan>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell />
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox1">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=IIF(Fields!Description_Item.Value &lt;&gt; "", Fields!Description_Item.Value, "&lt;empty&gt;")</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox1</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                        <ColSpan>6</ColSpan>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.99688cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ErrorText_ItemErrors">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ErrorText_ItemErrors.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ErrorText_ItemErrors</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                        <ColSpan>8</ColSpan>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.49389cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="EntryNo_ItemLedgerEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!EntryNo_ItemLedgerEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>EntryNo_ItemLedgerEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemNo_ItemLedgerEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ItemNo_ItemLedgerEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ItemNo_ItemLedgerEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="PostingDate_ItemLedgerEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!PostingDate_ItemLedgerEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <Format>d</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>PostingDate_ItemLedgerEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="EntryType_ItemLedgerEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!EntryType_ItemLedgerEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>EntryType_ItemLedgerEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Quantity_ItemLedgerEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!Quantity_ItemLedgerEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <Format>=Fields!Quantity_ItemLedgerEntryFormat.Value</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Quantity_ItemLedgerEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="RemainingQuantity_ItemLedgerEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!RemainingQuantity_ItemLedgerEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <Format>=Fields!RemainingQuantity_ItemLedgerEntryFormat.Value</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>RemainingQuantity_ItemLedgerEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Positive_ItemLedgerEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!Positive_ItemLedgerEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Positive_ItemLedgerEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Open_ItemLedgerEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!Open_ItemLedgerEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Open_ItemLedgerEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>5pt</PaddingLeft>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.8cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ErrorText_Errors">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ErrorText_Errors.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ErrorText_Errors</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                        <ColSpan>8</ColSpan>
+                        <rd:Selected>true</rd:Selected>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.6cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="EntryNo_ValueEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!EntryNo_ValueEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>EntryNo_ValueEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemNo_ValueEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ItemNo_ValueEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ItemNo_ValueEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="PostingDate_ValueEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!PostingDate_ValueEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <Format>d</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>PostingDate_ValueEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemLedgerEntryType_ValueEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ItemLedgerEntryType_ValueEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ItemLedgerEntryType_ValueEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemLedgerEntryQuantity_ValueEntry">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ItemLedgerEntryQuantity_ValueEntry.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ItemLedgerEntryQuantity_ValueEntry</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>5pt</PaddingLeft>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox91">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox91</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox92">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox92</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox93">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox93</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember>
+                  <Group Name="Number_ErrorGroup">
+                    <GroupExpressions>
+                      <GroupExpression>=Fields!Number_ErrorGroup.Value</GroupExpression>
+                    </GroupExpressions>
+                  </Group>
+                  <SortExpressions>
+                    <SortExpression>
+                      <Value>=Fields!Number_ErrorGroup.Value</Value>
+                    </SortExpression>
+                  </SortExpressions>
+                  <TablixMembers>
+                    <TablixMember />
+                    <TablixMember>
+                      <Group Name="No_Item">
+                        <GroupExpressions>
+                          <GroupExpression>=Fields!No_Item.Value</GroupExpression>
+                        </GroupExpressions>
+                      </Group>
+                      <SortExpressions>
+                        <SortExpression>
+                          <Value>=Fields!No_Item.Value</Value>
+                        </SortExpression>
+                      </SortExpressions>
+                      <TablixMembers>
+                        <TablixMember />
+                        <TablixMember>
+                          <Group Name="Number_ItemErrors">
+                            <GroupExpressions>
+                              <GroupExpression>=Fields!Number_ItemErrors.Value</GroupExpression>
+                            </GroupExpressions>
+                          </Group>
+                          <SortExpressions>
+                            <SortExpression>
+                              <Value>=Fields!Number_ItemErrors.Value</Value>
+                            </SortExpression>
+                          </SortExpressions>
+                          <TablixMembers>
+                            <TablixMember>
+                              <Visibility>
+                                <Hidden>=Fields!ErrorText_ItemErrors.Value &lt;= ""</Hidden>
+                              </Visibility>
+                            </TablixMember>
+                            <TablixMember>
+                              <Group Name="EntryNo_ItemLedgerEntry">
+                                <GroupExpressions>
+                                  <GroupExpression>=Fields!EntryNo_ItemLedgerEntry.Value</GroupExpression>
+                                </GroupExpressions>
+                              </Group>
+                              <SortExpressions>
+                                <SortExpression>
+                                  <Value>=Fields!EntryNo_ItemLedgerEntry.Value</Value>
+                                </SortExpression>
+                              </SortExpressions>
+                              <TablixMembers>
+                                <TablixMember>
+                                  <Visibility>
+                                    <Hidden>=Fields!ItemNo_ItemLedgerEntry.Value &lt;= ""</Hidden>
+                                  </Visibility>
+                                  <KeepWithGroup>After</KeepWithGroup>
+                                </TablixMember>
+                                <TablixMember>
+                                  <Group Name="Number_Errors">
+                                    <GroupExpressions>
+                                      <GroupExpression>=Fields!Number_Errors.Value</GroupExpression>
+                                    </GroupExpressions>
+                                  </Group>
+                                  <SortExpressions>
+                                    <SortExpression>
+                                      <Value>=Fields!Number_Errors.Value</Value>
+                                    </SortExpression>
+                                  </SortExpressions>
+                                  <TablixMembers>
+                                    <TablixMember>
+                                      <Visibility>
+                                        <Hidden>=Fields!ErrorText_Errors.Value &lt;= ""</Hidden>
+                                      </Visibility>
+                                      <KeepWithGroup>After</KeepWithGroup>
+                                    </TablixMember>
+                                    <TablixMember>
+                                      <Group Name="Details" />
+                                      <Visibility>
+                                        <Hidden>=Fields!ItemLedgerEntryQuantity_ValueEntryFormat.Value &lt;= ""</Hidden>
+                                      </Visibility>
+                                    </TablixMember>
+                                  </TablixMembers>
+                                </TablixMember>
+                              </TablixMembers>
+                            </TablixMember>
+                          </TablixMembers>
+                        </TablixMember>
+                      </TablixMembers>
+                    </TablixMember>
+                  </TablixMembers>
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>DataSet_Result</DataSetName>
+            <Filters>
+              <Filter>
+                <FilterExpression>=Fields!ItemSummaryCaption.Value</FilterExpression>
+                <Operator>LessThanOrEqual</Operator>
+                <FilterValues>
+                  <FilterValue>""</FilterValue>
+                </FilterValues>
+              </Filter>
+            </Filters>
+            <Height>5.35223cm</Height>
+            <Width>17.85cm</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Tablix>
+          <Tablix Name="Tablix3">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>2.95479cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>14.89521cm</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.75875cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemSummaryCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ItemSummaryCaption.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ItemSummaryCaption</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                        <ColSpan>2</ColSpan>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell />
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.6cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox142">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!ItemNo_ItemLedgerEntryCaption.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox142</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox141">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!Description_ItemCaption.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox141</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.6cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="No_Summary">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=IIF(Fields!No_Summary.Value &lt;&gt; "", Fields!No_Summary.Value, "&lt;empty&gt;")</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>No_Summary</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Description_Summary">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=IIF(Fields!Description_Summary.Value &lt;&gt; "", Fields!Description_Summary.Value, "&lt;empty&gt;")</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Description_Summary</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <KeepWithGroup>After</KeepWithGroup>
+                </TablixMember>
+                <TablixMember>
+                  <KeepWithGroup>After</KeepWithGroup>
+                </TablixMember>
+                <TablixMember>
+                  <Group Name="Details1" />
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>DataSet_Result</DataSetName>
+            <Filters>
+              <Filter>
+                <FilterExpression>=Fields!ItemSummaryCaption.Value</FilterExpression>
+                <Operator>GreaterThan</Operator>
+                <FilterValues>
+                  <FilterValue>""</FilterValue>
+                </FilterValues>
+              </Filter>
+            </Filters>
+            <Top>5.81899cm</Top>
+            <Height>1.95875cm</Height>
+            <Width>17.85cm</Width>
+            <ZIndex>1</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Tablix>
+        </ReportItems>
+        <Height>7.77774cm</Height>
+        <Style />
+      </Body>
+      <Width>17.85cm</Width>
+      <Page>
+        <PageHeader>
+          <Height>1.692cm</Height>
+          <PrintOnFirstPage>true</PrintOnFirstPage>
+          <PrintOnLastPage>true</PrintOnLastPage>
+          <ReportItems>
+            <Textbox Name="PageNumberTextBox">
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=Globals!PageNumber</Value>
+                      <Style>
+                        <FontSize>7pt</FontSize>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Right</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <Top>0.423cm</Top>
+              <Left>17.4cm</Left>
+              <Height>0.423cm</Height>
+              <Width>0.45cm</Width>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+              </Style>
+            </Textbox>
+            <Textbox Name="UserIdTextBox">
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=User!UserID</Value>
+                      <Style>
+                        <FontSize>7pt</FontSize>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Right</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <Top>0.846cm</Top>
+              <Left>14.6cm</Left>
+              <Height>0.423cm</Height>
+              <Width>3.25cm</Width>
+              <ZIndex>1</ZIndex>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+              </Style>
+            </Textbox>
+            <Textbox Name="ExecutionTimeTextBox">
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=Globals!ExecutionTime</Value>
+                      <Style>
+                        <FontSize>7pt</FontSize>
+                        <Format>g</Format>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Right</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <Left>14.7cm</Left>
+              <Height>0.423cm</Height>
+              <Width>3.15cm</Width>
+              <ZIndex>2</ZIndex>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+              </Style>
+            </Textbox>
+            <Textbox Name="COMPANYNAME1">
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=First(Fields!CompanyName.Value, "DataSet_Result")</Value>
+                      <Style>
+                        <FontSize>7pt</FontSize>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style />
+                </Paragraph>
+              </Paragraphs>
+              <Top>0.423cm</Top>
+              <Height>0.423cm</Height>
+              <Width>7.5cm</Width>
+              <ZIndex>3</ZIndex>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+              </Style>
+            </Textbox>
+            <Textbox Name="Costing_Error_DetectionCaption1">
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=Parameters!ReportName.Value</Value>
+                      <Style>
+                        <FontSize>8pt</FontSize>
+                        <FontWeight>Bold</FontWeight>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style />
+                </Paragraph>
+              </Paragraphs>
+              <Height>0.423cm</Height>
+              <Width>7.5cm</Width>
+              <ZIndex>4</ZIndex>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+              </Style>
+            </Textbox>
+            <Textbox Name="CurrReport_PAGENOCaption1">
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=Parameters!PageNoCaption.Value</Value>
+                      <Style>
+                        <FontSize>7pt</FontSize>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style />
+                </Paragraph>
+              </Paragraphs>
+              <Top>0.423cm</Top>
+              <Left>16.65cm</Left>
+              <Height>0.423cm</Height>
+              <Width>0.75cm</Width>
+              <ZIndex>5</ZIndex>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+              </Style>
+            </Textbox>
+          </ReportItems>
+          <Style />
+        </PageHeader>
+        <PageHeight>29.7cm</PageHeight>
+        <PageWidth>21cm</PageWidth>
+        <LeftMargin>2.1cm</LeftMargin>
+        <RightMargin>0cm</RightMargin>
+        <TopMargin>2cm</TopMargin>
+        <BottomMargin>2cm</BottomMargin>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <ReportParameters>
+    <ReportParameter Name="Description_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Description_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Description_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="EntryNo_ItemLedgerEntryCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>EntryNo_ItemLedgerEntryCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>EntryNo_ItemLedgerEntryCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="EntryType_ItemLedgerEntryCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>EntryType_ItemLedgerEntryCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>EntryType_ItemLedgerEntryCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ItemNo_ItemLedgerEntryCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>ItemNo_ItemLedgerEntryCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ItemNo_ItemLedgerEntryCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Quantity_ItemLedgerEntryCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Quantity_ItemLedgerEntryCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Quantity_ItemLedgerEntryCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="RemainingQuantity_ItemLedgerEntryCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>RemainingQuantity_ItemLedgerEntryCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>RemainingQuantity_ItemLedgerEntryCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Positive_ItemLedgerEntryCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Positive_ItemLedgerEntryCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Positive_ItemLedgerEntryCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Open_ItemLedgerEntryCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Open_ItemLedgerEntryCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Open_ItemLedgerEntryCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="PostingDate_ItemLedgerEntryCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>PostingDate_ItemLedgerEntryCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>PostingDate_ItemLedgerEntryCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ReportName">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>ReportName</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ReportName</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="PageNoCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>PageNoCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>PageNoCaption</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <ReportParametersLayout>
+    <GridLayoutDefinition>
+      <NumberOfColumns>1</NumberOfColumns>
+      <NumberOfRows>11</NumberOfRows>
+      <CellDefinitions>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>Description_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>EntryNo_ItemLedgerEntryCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>EntryType_ItemLedgerEntryCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>3</RowIndex>
+          <ParameterName>ItemNo_ItemLedgerEntryCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>4</RowIndex>
+          <ParameterName>Quantity_ItemLedgerEntryCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>5</RowIndex>
+          <ParameterName>RemainingQuantity_ItemLedgerEntryCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>6</RowIndex>
+          <ParameterName>Positive_ItemLedgerEntryCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>7</RowIndex>
+          <ParameterName>Open_ItemLedgerEntryCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>8</RowIndex>
+          <ParameterName>PostingDate_ItemLedgerEntryCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>9</RowIndex>
+          <ParameterName>ReportName</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>10</RowIndex>
+          <ParameterName>PageNoCaption</ParameterName>
+        </CellDefinition>
+      </CellDefinitions>
+    </GridLayoutDefinition>
+  </ReportParametersLayout>
+  <Code>Public Function BlankZero(ByVal Value As Decimal)
+    if Value = 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankPos(ByVal Value As Decimal)
+    if Value &gt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankZeroAndPos(ByVal Value As Decimal)
+    if Value &gt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNeg(ByVal Value As Decimal)
+    if Value &lt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNegAndZero(ByVal Value As Decimal)
+    if Value &lt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+</Code>
+  <Language>=User!Language</Language>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Cm</rd:ReportUnitType>
+</Report>
+    END_OF_RDLDATA
+  }
+}
+

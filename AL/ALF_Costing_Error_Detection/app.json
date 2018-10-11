@@ -1,0 +1,23 @@
+{
+  "id": "c66c595b-d014-44e4-aac6-3ba093dbb006",
+  "name": "ALF_Costing_Error_Detection",
+  "publisher": "Alexey Finogenov",
+  "brief": "",
+  "description": "",
+  "version": "1.0.0.0",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "capabilities": [],
+  "dependencies": [],
+  "screenshots": [],
+  "platform": "13.0.0.0",
+  "application": "13.0.0.0",
+  "idRange": {
+    "from": 50100,
+    "to": 50149
+  },
+  "runtime": "2.0"
+}
